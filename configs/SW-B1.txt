@@ -1,0 +1,71 @@
+enable
+conf t
+hostname SW-B1
+ip domain-name doghroon.local
+enable secret suha81
+
+username suadmin privilege 15 secret 81suha
+
+crypto key generate rsa
+1024
+
+line con 0
+login local
+password NetAdSu23
+exit
+line vty 0 4
+login local
+password NetAdSu23
+transport input ssh
+exit
+
+ip ssh version 2
+service password-encryption
+banner motd # Authorized Access Only - SW-B1 Building B #
+
+vlan 70
+name OPERATIONS
+exit
+vlan 80
+name TRAFFIC-CONTROL
+exit
+vlan 90
+name OP-SUPPORT
+exit
+vlan 110
+name STAFF-WIFI
+exit
+vlan 130
+name NETWORK-MGMT
+exit
+
+int vlan 130
+ip address 10.10.131.2 255.255.255.240
+no sh
+exit
+
+ip default-gateway 10.10.131.1
+
+int g0/1
+description Trunk to R2
+switchport mode trunk
+switchport trunk allowed vlan 70,80,90,110,130
+no sh
+exit
+
+int f0/1
+description Trunk to SW-B2
+switchport mode trunk
+switchport trunk allowed vlan 70,110,130
+no sh
+exit
+
+int f0/2
+description Trunk to SW-B3
+switchport mode trunk
+switchport trunk allowed vlan 80,90,130
+no sh
+exit
+
+end
+wr

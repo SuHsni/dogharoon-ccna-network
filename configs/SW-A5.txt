@@ -1,0 +1,72 @@
+Switch>en
+Switch#conf t
+Switch(config)#hostname SW-A5
+Switch(config)#ip domain-name doghroon.local
+
+! ===== Basic Security =====
+SW-A5(config)#en secret suha81
+SW-A5(config)#username suadmin privilege 15 secret 81suha
+SW-A5(config)#crypto key generate rsa
+1024
+SW-A5(config)#line con 0
+SW-A5(config-line)#login local
+SW-A5(config-line)#password NetAdSu23
+SW-A5(config-line)#exit
+SW-A5(config)#line vty 0 4
+SW-A5(config-line)#login local
+SW-A5(config-line)#password NetAdSu23
+SW-A5(config-line)#transport input ssh
+SW-A5(config-line)#exit
+SW-A5(config)#ip ssh version 2
+SW-A5(config)#service password-encryption
+SW-A5(config)#login block-for 120 attempts 3 within 60
+SW-A5(config)#banner motd # Authorized Access Only - SW-A5 Building A #
+
+! ===== VLANs =====
+
+SW-A5(config)#vlan 60
+SW-A5(config-vlan)#name CUSTOMER-SERVICE
+SW-A5(config-vlan)#exit
+
+SW-A5(config)#vlan 120
+SW-A5(config-vlan)#name GUEST-WIFI
+SW-A5(config-vlan)#exit
+
+SW-A5(config)#vlan 130
+SW-A5(config-vlan)#name NETWORK-MGMT
+SW-A5(config-vlan)#exit
+
+! ===== Management IP =====
+SW-A5(config)#int vlan 130
+SW-A5(config-if)#ip address 10.10.130.7 255.255.255.240
+SW-A5(config-if)#no sh
+SW-A5(config-if)#exit
+
+! ===== Default Gateway =====
+SW-A5(config)#ip default-gateway 10.10.130.1
+
+! ===== Trunk to SW-A1 =====
+SW-A5(config)#int f0/24
+SW-A5(config-if)#description Trunk to SW-A1
+SW-A5(config-if)#switchport mode trunk
+SW-A5(config-if)#switchport trunk allowed vlan 60,120,130
+SW-A5(config-if)#no sh
+SW-A5(config-if)#exit
+
+! ===== Access Ports =====
+
+! VLAN 60 -  CUSTOMER-SERVICE
+SW-A5(config)#int range f0/1-10
+SW-A5(config-if-range)#switchport mode access
+SW-A5(config-if-range)#switchport access vlan 60
+SW-A5(config-if-range)#exit
+
+! VLAN 120 -  GUEST-WIFI
+SW-A5(config)#int f0/23
+SW-A5(config-if)#switchport mode access
+SW-A5(config-if)#switchport access vlan 120
+SW-A5(config-if)#exit
+
+! ===== Save =====
+end
+wr

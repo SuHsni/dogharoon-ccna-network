@@ -1,0 +1,70 @@
+Switch>en
+Switch#conf t
+Switch(config)#hostname SW-A3
+Switch(config)#ip domain-name doghroon.local
+
+! ===== Basic Security =====
+SW-A3(config)#en secret suha81
+SW-A3(config)#username suadmin privilege 15 secret 81suha
+SW-A3(config)#crypto key generate rsa
+1024
+SW-A3(config)#line con 0
+SW-A3(config-line)#login local
+SW-A3(config-line)#password NetAdSu23
+SW-A3(config-line)#exit
+SW-A3(config)#line vty 0 4
+SW-A3(config-line)#login local
+SW-A3(config-line)#password NetAdSu23
+SW-A3(config-line)#transport input ssh
+SW-A3(config-line)#exit
+SW-A3(config)#ip ssh version 2
+SW-A3(config)#service password-encryption
+SW-A3(config)#login block-for 120 attempts 3 within 60
+SW-A3(config)#banner motd # Authorized Access Only - SW-A3 Building A #
+
+! ===== VLANs =====
+SW-A3(config)#vlan 30
+SW-A3(config-vlan)#name FINANCE
+SW-A3(config-vlan)#exit
+
+SW-A3(config)#vlan 40
+SW-A3(config-vlan)#name COMMERCE
+SW-A3(config-vlan)#exit
+
+SW-A3(config)#vlan 130
+SW-A3(config-vlan)#name NETWORK-MGMT
+SW-A3(config-vlan)#exit
+
+! ===== Management IP =====
+SW-A3(config)#int vlan 130
+SW-A3(config-if)#ip address 10.10.130.5 255.255.255.240
+SW-A3(config-if)#no sh
+SW-A3(config-if)#exit
+
+! ===== Default Gateway =====
+SW-A3(config)#ip default-gateway 10.10.130.1
+
+! ===== Trunk to SW-A1 =====
+SW-A3(config)#int f0/24
+SW-A3(config-if)#description Trunk to SW-A1
+SW-A3(config-if)#switchport mode trunk
+SW-A3(config-if)#switchport trunk allowed vlan 30,40,130
+SW-A3(config-if)#no sh
+SW-A3(config-if)#exit
+
+! ===== Access Ports =====
+! VLAN 30 - FINANCE
+SW-A3(config)#int range f0/1-12
+SW-A3(config-if-range)#switchport mode access
+SW-A3(config-if-range)#switchport access vlan 30
+SW-A3(config-if-range)#exit
+
+! VLAN 40 -  COMMERCE
+SW-A3(config)#int range f0/13-23
+SW-A3(config-if-range)#switchport mode access
+SW-A3(config-if-range)#switchport access vlan 40
+SW-A3(config-if-range)#exit
+
+! ===== Save =====
+end
+wr

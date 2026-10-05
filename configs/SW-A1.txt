@@ -1,0 +1,129 @@
+Switch>en
+Switch#conf t
+Switch(config)#hostname SW-A1
+Switch(config)#ip domain-name dogharoon.local
+
+!==== enable password ====
+SW-A1(config)#enable secret suha81
+
+!==== console password ====
+SW-A1(config)#line con 0
+SW-A1(config-line)#login local
+SW-A1(config-line)#password NetAdSu23
+SW-A1(config-line)#exit
+
+!==== ssh configuration ====
+SW-A1(config)#username suadmin privilege 15 secret 81suha
+SW-A1(config)#crypto key generate rsa
+1024
+SW-A1(config)#line vty 0 4
+SW-A1(config-line)#login local
+SW-A1(config-line)#password NetAdSu23
+SW-A1(config-line)#transport input ssh
+SW-A1(config-line)#exit
+
+!==== basic security ====
+SW-A1(config)#ip ssh version 2
+SW-A1(config)#service password-encryption
+SW-A1(config)#login block-for 120 attempts 3 within 60
+
+!==== banner ====
+SW-A1(config)#banner motd # Authorized Access Only - SW-A1 Building A #
+
+! ==== vlans =====
+SW-A1(config)#vlan 10
+SW-A1(config)#name MANAGEMENT-USERS
+SW-A1(config)#exit
+
+SW-A1(config)#vlan 20
+SW-A1(config)#name ADMIN-HR
+SW-A1(config)#exit
+
+SW-A1(config)#vlan 30
+SW-A1(config-vlan)#name FINANCE
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 40
+SW-A1(config-vlan)#name COMMERCE
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 50
+SW-A1(config-vlan)#name IT
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 60
+SW-A1(config-vlan)#name CUSTOMER-SERVICE
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 100
+SW-A1(config-vlan)#name SERVERS
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 110
+SW-A1(config-vlan)#name STAFF-WIFI
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 120
+SW-A1(config-vlan)#name GUEST-WIFI
+SW-A1(config-vlan)#exit
+
+SW-A1(config)#vlan 130
+SW-A1(config-vlan)#name NETWORK-MGMT
+SW-A1(config-vlan)#exit
+
+
+! ===== Management IP (VLAN 130) =====
+SW-A1(config)#int vlan 130
+SW-A1(config-if)#ip address 10.10.130.3 255.255.255.240
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+! ===== Default Gateway =====
+SW-A1(config)#ip default-gateway 10.10.130.1
+
+!==== trunk port to R1 ====
+SW-A1(config)#int g0/1
+SW-A1(config-if)#desc trunk to R1
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 10,20,30,40,50,60,100,110,120,130
+
+! === trunk ports sw-a2 ... sw-a6 ===
+SW-A1(config)#int f0/1
+SW-A1(config-if)#desc trunk to SW-A2
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 10,20,110,130
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+SW-A1(config)#int f0/2
+SW-A1(config-if)#desc trunk to SW-A3
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 30,40,130
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+SW-A1(config)#int f0/3
+SW-A1(config-if)#desc trunk to SW-A4
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 40,50,60,130
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+SW-A1(config)#int f0/4
+SW-A1(config-if)#desc trunk to SW-A5
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 60,120,130
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+SW-A1(config)#int f0/5
+SW-A1(config-if)#desc trunk to SW-A6
+SW-A1(config-if)#switchport mode trunk
+SW-A1(config-if)#switchport trunk allowed vlan 100,130
+SW-A1(config-if)#no sh
+SW-A1(config-if)#exit
+
+! ===== Save =====
+end
+wr
+

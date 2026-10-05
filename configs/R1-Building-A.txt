@@ -1,0 +1,278 @@
+Router>en
+Router#conf t
+Router(config)#hostname R1-Building-A
+Router(config)#ip domain-name doghroon.local
+
+! ======= enable pass ========
+R1-Building-A(config)#en secret suha81
+
+! ======= console pass ========
+R1-Building-A(config)#line con 0
+R1-Building-A(config-line)#login local
+R1-Building-A(config-line)#password NetAdSu23
+R1-Building-A(config-line)#exit
+
+! ======= ssh configuration ========
+R1-Building-A(config)#username suadmin privilege 15 secret 81suha
+R1-Building-A(config)#crypto key generate rsa
+1024
+R1-Building-A(config)#line vty 0 4
+R1-Building-A(config-line)#login local
+R1-Building-A(config-line)#password NetAdSu23
+R1-Building-A(config-line)#transport input ssh
+R1-Building-A(config-line)#exit
+
+! ======= basic security ========
+R1-Building-A(config)#ip ssh version 2
+R1-Building-A(config)#service password-encryption
+R1-Building-A(config)#login block-for 120 attempts 3 within 60
+
+! ======= banner ========
+R1-Building-A(config)#banner motd # Authorized Access Only - R1 Building A #
+
+! ======= interface g0/0 (SW-A1 - Trunk) ========
+R1-Building-A(config)#int g0/0
+R1-Building-A(config-if)#description Trunk link toward SW-A1
+R1-Building-A(config-if)#ip nat inside
+R1-Building-A(config-if)#no sh
+R1-Building-A(config-if)#exit
+
+! ======= interface g0/1 (ISP) ========
+R1-Building-A(config)#int g0/1
+R1-Building-A(config-if)#description ISP / Internet
+R1-Building-A(config-if)#ip address 203.0.113.2 255.255.255.252
+R1-Building-A(config-if)#ip nat outside
+R1-Building-A(config-if)#no sh
+R1-Building-A(config-if)#exit
+
+! ======= interface g0/2/0 ( R2 - Fiber) ========
+R1-Building-A(config)#int g0/2/0
+R1-Building-A(config-if)#description Fiber link toward R2 (Primary)
+R1-Building-A(config-if)#ip add 10.0.0.1 255.255.255.252
+R1-Building-A(config-if)#ip nat inside
+R1-Building-A(config-if)#no sh
+R1-Building-A(config-if)#exit
+
+! ======= interface g0/3/0 ( R2 - Fiber) ========
+R1-Building-A(config)#int g0/3/0
+R1-Building-A(config-if)#description Fiber link toward R2 (Backup - Shutdown)
+R1-Building-A(config-if)#shutdown
+R1-Building-A(config-if)#exit
+
+! ======= VLAN10 - Management-Users ======
+R1-Building-A(config)#int g0/0.10
+R1-Building-A(config-subif)#encapsulation dot1q 10
+R1-Building-A(config-subif)#ip add 10.10.10.1 255.255.255.240
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN10 - Management-Users
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 20 - ADMIN-HR =====
+R1-Building-A(config)#int g0/0.20
+R1-Building-A(config-subif)#encapsulation dot1q 20
+R1-Building-A(config-subif)#ip add 10.10.20.1 255.255.255.224
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 20 - ADMIN-HR
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 30 - FINANCE =====
+R1-Building-A(config)#int g0/0.30
+R1-Building-A(config-subif)#encapsulation dot1q 30
+R1-Building-A(config-subif)#ip add 10.10.30.1 255.255.255.224
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#des VLAN 30 - FINANCE
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 40 - COMMERCE =====
+R1-Building-A(config)#int g0/0.40
+R1-Building-A(config-subif)#encapsulation dot1q 40
+R1-Building-A(config-subif)#ip add 10.10.40.1 255.255.255.224
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 40 - COMMERCE
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 50 - IT =====
+R1-Building-A(config)#int g0/0.50
+R1-Building-A(config-subif)#encapsulation dot1q 50
+R1-Building-A(config-subif)#ip add 10.10.50.1 255.255.255.240
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 50 - IT
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 60 - CUSTOMER-SERVICE =====
+R1-Building-A(config)#int g0/0.60
+R1-Building-A(config-subif)#encapsulation dot1q 60
+R1-Building-A(config-subif)#ip add 10.10.60.1 255.255.255.192
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 60 - CUSTOMER-SERVICE
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 70 - OPERATIONS =====
+R1-Building-A(config)#int g0/0.70
+R1-Building-A(config-subif)#encapsulation dot1q 70
+R1-Building-A(config-subif)#ip add 10.10.70.1 255.255.255.224
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 70 - OPERATIONS
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 80 - TRAFFIC-CONTROL =====
+R1-Building-A(config)#int g0/0.80
+R1-Building-A(config-subif)#encapsulation dot1q 80
+R1-Building-A(config-subif)#ip add 10.10.80.1 255.255.255.224
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 80 - TRAFFIC-CONTROL
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 90 - OP-SUPPORT =====
+R1-Building-A(config)#int g0/0.90
+R1-Building-A(config-subif)#encapsulation dot1q 90
+R1-Building-A(config-subif)#ip add 10.10.90.1 255.255.255.240
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 90 - OP-SUPPORT
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 100 - SERVERS =====
+R1-Building-A(config)#int g0/0.100
+R1-Building-A(config-subif)#encapsulation dot1q 100
+R1-Building-A(config-subif)#ip add 10.10.100.1 255.255.255.240
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 100 - SERVERS
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 110 - STAFF-WIFI =====
+R1-Building-A(config)#int g0/0.110
+R1-Building-A(config-subif)#encapsulation dot1q 110
+R1-Building-A(config-subif)#ip add 10.10.110.1 255.255.255.192
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 110 - STAFF-WIFI
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 120 - GUEST-WIFI =====
+R1-Building-A(config)#int g0/0.120
+R1-Building-A(config-subif)#encapsulation dot1q 120
+R1-Building-A(config-subif)#ip add 10.10.120.1 255.255.255.128
+R1-Building-A(config-subif)#ip helper-address 10.10.100.10
+R1-Building-A(config-subif)#desc VLAN 120 - GUEST-WIFI
+R1-Building-A(config-subif)#exit
+
+! ===== VLAN 130 - NETWORK-MGMT =====
+R1-Building-A(config)#int g0/0.130
+R1-Building-A(config-subif)#encapsulation dot1q 130
+R1-Building-A(config-subif)#ip add 10.10.130.1 255.255.255.240
+R1-Building-A(config-subif)#desc VLAN 130 - NETWORK-MGMT
+R1-Building-A(config-subif)#exit
+
+! ===== Routing (OSPF) ====
+R1-Building-A(config)#router ospf 1
+R1-Building-A(config-router)#network 10.10.10.0 0.0.0.15 area 0
+R1-Building-A(config-router)#network 10.10.20.0 0.0.0.31 area 0
+R1-Building-A(config-router)#network 10.10.30.0 0.0.0.31 area 0
+R1-Building-A(config-router)#network 10.10.40.0 0.0.0.31 area 0
+R1-Building-A(config-router)#network 10.10.50.0 0.0.0.15 area 0
+R1-Building-A(config-router)#network 10.10.60.0 0.0.0.63 area 0
+R1-Building-A(config-router)#network 10.10.100.0 0.0.0.15 area 0
+R1-Building-A(config-router)#network 10.10.110.0 0.0.0.255 area 0
+R1-Building-A(config-router)#network 10.10.120.0 0.0.0.127 area 0
+R1-Building-A(config-router)#network 10.10.130.0 0.0.0.15 area 0
+R1-Building-A(config-router)#network 10.0.0.0 0.0.0.3 area 0
+R1-Building-A(config-router)#default-information originate
+R1-Building-A(config-router)#exit
+
+! ====== default route (ISP) ======
+R1-Building-A(config)#ip route 0.0.0.0 0.0.0.0 203.0.113.1
+
+
+! ===== NAT ======
+R1-Building-A(config)#access-list 1 permit 10.10.0.0 0.0.255.255
+R1-Building-A(config)#ip nat inside source list 1 int g0/1
+R1-Building-A(config)#int g0/0
+R1-Building-A(config-if)#ip nat inside
+R1-Building-A(config-if)#exit
+
+R1-Building-A(config)#int g0/2/0
+R1-Building-A(config-if)#ip nat inside
+R1-Building-A(config-if)#exit
+
+R1-Building-A(config)#int g0/1
+R1-Building-A(config-if)#ip nat outside
+R1-Building-A(config-if)#exit
+
+! ==================================================
+! R1-Building-A — ACL Configuration
+! ==================================================
+
+! ===== ACL 100 — Guest WiFi Isolation =====
+R1-Building-A(config)#access-list 100 permit udp any any eq 67
+R1-Building-A(config)#access-list 100 permit udp any any eq 68
+R1-Building-A(config)#access-list 100 deny ip 10.10.120.0 0.0.0.127 10.10.0.0 0.0.255.255
+R1-Building-A(config)#access-list 100 permit ip 10.10.120.0 0.0.0.127 any
+
+R1-Building-A(config)#int g0/0.120
+R1-Building-A(config-subif)#ip access-group 100 in
+R1-Building-A(config-subif)#exit
+
+! ===== ACL 102 — Admin-HR cannot access Finance =====
+R1-Building-A(config)#access-list 102 deny ip 10.10.20.0 0.0.0.31 10.10.30.0 0.0.0.31
+R1-Building-A(config)#access-list 102 permit ip any any
+
+R1-Building-A(config)#int g0/0.20
+R1-Building-A(config-subif)#ip access-group 102 in
+R1-Building-A(config-subif)#exit
+
+! ===== ACL BLOCK-MGMT — Deny access to VLAN 130 =====
+R1-Building-A(config)#ip access-list extended BLOCK-MGMT
+R1-Building-A(config-ext-nacl)#deny ip 10.10.0.0 0.0.255.255 10.10.130.0 0.0.0.15
+R1-Building-A(config-ext-nacl)#permit ip any any
+R1-Building-A(config-ext-nacl)#exit
+
+R1-Building-A(config)#int g0/0.10
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.20
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.30
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.40
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.50
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.60
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.70
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.80
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.90
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.110
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+R1-Building-A(config)#int g0/0.120
+R1-Building-A(config-subif)#ip access-group BLOCK-MGMT in
+R1-Building-A(config-subif)#exit
+
+! ===== Save =====
+end
+wr
+
+! ======= save =======
+end
+wr

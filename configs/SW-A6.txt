@@ -1,0 +1,62 @@
+Switch>en
+Switch#conf t
+Switch(config)#hostname SW-A6
+Switch(config)#ip domain-name doghroon.local
+
+! ===== Basic Security =====
+SW-A6(config)#en secret suha81
+SW-A6(config)#username suadmin privilege 15 secret 81suha
+SW-A6(config)#crypto key generate rsa
+1024
+SW-A6(config)#line con 0
+SW-A6(config-line)#login local
+SW-A6(config-line)#password NetAdSu23
+SW-A6(config-line)#exit
+SW-A6(config)#line vty 0 4
+SW-A6(config-line)#login local
+SW-A6(config-line)#password NetAdSu23
+SW-A6(config-line)#transport input ssh
+SW-A6(config-line)#exit
+SW-A6(config)#ip ssh version 2
+SW-A6(config)#service password-encryption
+SW-A6(config)#login block-for 120 attempts 3 within 60
+SW-A6(config)#banner motd # Authorized Access Only - SW-A6 Building A #
+
+! ===== VLANs =====
+
+SW-A6(config)#vlan 100
+SW-A6(config-vlan)#name SERVERS
+SW-A6(config-vlan)#exit
+
+SW-A6(config)#vlan 130
+SW-A6(config-vlan)#name NETWORK-MGMT
+SW-A6(config-vlan)#exit
+
+! ===== Management IP =====
+SW-A6(config)#int vlan 130
+SW-A6(config-if)#ip address 10.10.130.8 255.255.255.240
+SW-A6(config-if)#no sh
+SW-A6(config-if)#exit
+
+! ===== Default Gateway =====
+SW-A6(config)#ip default-gateway 10.10.130.1
+
+! ===== Trunk to SW-A1 =====
+SW-A6(config)#int f0/24
+SW-A6(config-if)#description Trunk to SW-A1
+SW-A6(config-if)#switchport mode trunk
+SW-A6(config-if)#switchport trunk allowed vlan 100,130
+SW-A6(config-if)#no sh
+SW-A6(config-if)#exit
+
+! ===== Access Ports =====
+
+! VLAN 100 -  SERVERS
+SW-A6(config)#int range f0/1-4
+SW-A6(config-if-range)#switchport mode access
+SW-A6(config-if-range)#switchport access vlan 100
+SW-A6(config-if-range)#exit
+
+! ===== Save =====
+end
+wr

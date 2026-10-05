@@ -1,0 +1,84 @@
+Switch>en
+Switch#conf t
+Switch(config)#hostname SW-A2
+Switch(config)#ip domain-name doghroon.local
+
+! ===== Basic Security =====
+SW-A2(config)#enable secret suha81
+SW-A2(config)#username suadmin privilege 15 secret 81suha
+SW-A2(config)#crypto key generate rsa
+1024
+SW-A2(config)#line con 0
+SW-A2(config-line)#login local
+SW-A2(config-line)#password NetAdSu23
+SW-A2(config-line)#exit
+SW-A2(config)#line vty 0 4
+SW-A2(config-line)#login local
+SW-A2(config-line)#password NetAdSu23
+SW-A2(config-line)#transport input ssh
+SW-A2(config-line)#exit
+SW-A2(config)#ip ssh version 2
+SW-A2(config)#service password-encryption
+SW-A2(config)#login block-for 120 attempts 3 within 60
+SW-A2(config)#banner motd # Authorized Access Only - SW-A2 Building A #
+
+! ===== VLANs =====
+SW-A2(config)#vlan 10
+SW-A2(config-vlan)#name MANAGEMENT-USERS
+SW-A2(config-vlan)#exit
+
+SW-A2(config)#vlan 20
+SW-A2(config-vlan)#name ADMIN-HR
+SW-A2(config-vlan)#exit
+
+SW-A2(config)#vlan 110
+SW-A2(config-vlan)#name STAFF-WIFI
+SW-A2(config-vlan)#exit
+
+SW-A2(config)#vlan 130
+SW-A2(config-vlan)#name NETWORK-MGMT
+SW-A2(config-vlan)#exit
+
+! ===== Management IP =====
+SW-A2(config)#int vlan 130
+SW-A2(config-if)#ip address 10.10.130.4 255.255.255.240
+SW-A2(config-if)#no sh
+SW-A2(config-if)#exit
+
+! ===== Default Gateway =====
+SW-A2(config)#ip default-gateway 10.10.130.1
+
+! ===== Trunk to SW-A1 =====
+SW-A2(config)#int f0/24
+SW-A2(config-if)#description Trunk to SW-A1
+SW-A2(config-if)#switchport mode trunk
+SW-A2(config-if)#switchport trunk allowed vlan 10,20,110,130
+SW-A2(config-if)#no sh
+SW-A2(config-if)#exit
+
+! ===== Access Ports =====
+! VLAN 10 - Management
+SW-A2(config)#int range f0/1-5
+SW-A2(config-if-range)#switchport mode access
+SW-A2(config-if-range)#switchport access vlan 10
+SW-A2(config-if-range)#exit
+
+! VLAN 20 - Admin-HR
+SW-A2(config)#int range f0/6-20
+SW-A2(config-if-range)#switchport mode access
+SW-A2(config-if-range)#switchport access vlan 20
+SW-A2(config-if-range)#exit
+
+! VLAN 110 - Staff-wifi
+SW-A2(config)#int f0/22
+SW-A2(config-if)#switchport mode access
+SW-A2(config-if)#switchport access vlan 110
+SW-A2(config-if)#exit
+
+! VLAN 130 - NetAdmin-pc
+SW-A2(config)#int f0/23
+SW-A2(config-if)#switchport mode access
+SW-A2(config-if)#exit
+! ===== Save =====
+end
+wr
